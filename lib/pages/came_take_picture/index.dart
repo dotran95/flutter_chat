@@ -1,0 +1,1 @@
+export 'take_picture_router.dart';

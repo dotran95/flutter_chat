@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:demo/models/index.dart';
 import 'package:demo/pages/chat_room/chat_room_event.dart';
 import 'package:demo/pages/chat_room/chat_room_state.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:demo/extension/index.dart';
 
@@ -24,24 +26,49 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
 
   _onSendMessage(ChatRoomSendEvent event, Emitter<ChatRoomState> emit) async {
     final List<Message> items = state.items;
-    try {
-      final item = Message(
-          messageId: 101,
-          conversationId: 1,
-          text: event.message.trim(),
-          type: MessageType.text,
-          ownUser: User.guestUser,
-          createdAt: DateTime.now().toIso8601String(),
-          isOwner: true);
+    Message? item;
+
+    if (event.message != null) {
+      item = _createTextMessage(event.message!);
+    } else if (event.image != null) {
+      item = await _createImageMessage(event.image!);
+    }
+
+    if (item != null) {
       if (items.length > 0) {
         item.isMessageSameMinuteFromUser =
             _isMessageFromSameUserInOneMinute(item, items[items.length - 1]);
       }
       items.add(item);
       emit(state.copyWith(items: items));
-    } catch (e) {
-      print(e);
     }
+  }
+
+  Message _createTextMessage(String text) {
+    return Message(
+        messageId: 101,
+        conversationId: 1,
+        text: text.trim(),
+        type: MessageType.text,
+        ownUser: User.guestUser,
+        createdAt: DateTime.now().toIso8601String(),
+        isOwner: true);
+  }
+
+  Future<Message> _createImageMessage(File image) async {
+    final decodedImage = await decodeImageFromList(image.readAsBytesSync());
+    ImageSize size = ImageSize(
+        width: decodedImage.width.toDouble(),
+        height: decodedImage.height.toDouble());
+    return Message(
+        messageId: 101,
+        conversationId: 1,
+        type: MessageType.image,
+        ownUser: User.guestUser,
+        createdAt: DateTime.now().toIso8601String(),
+        size: size,
+        image: image,
+        isOwner: true);
   }
 
   Future<List<Message>> _loadMessages(int page) {
@@ -51,7 +78,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
 
   List<Message> _fakeDataListChat(int page) {
     var fromUser = User.guestUser;
-    var toUsser = User.guestUser2;
+    var toUser = User.guestUser2;
 
     List<Message> items = [];
     int currentIndex = max((page - 1) * 30, 0);
@@ -70,7 +97,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
                 "https://goldseasonnguyentuan.com/wp-content/uploads/2021/08/aragaki-yui-phim-va-chuong-trinh-truyen-hinh-2.jpg",
             isOwner: i % 2 == 0,
             size: ImageSize(width: 640, height: 797),
-            ownUser: i % 2 == 0 ? fromUser : toUsser,
+            ownUser: i % 2 == 0 ? fromUser : toUser,
             isMessageSameMinuteFromUser: isMessageFromSameUserInOneMinute,
             createdAt: createdAt.toIso8601String());
       } else {
@@ -80,7 +107,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
             type: MessageType.text,
             text: "das " + i.toString(),
             isOwner: i % 2 == 0,
-            ownUser: i % 2 == 0 ? fromUser : toUsser,
+            ownUser: i % 2 == 0 ? fromUser : toUser,
             isMessageSameMinuteFromUser: isMessageFromSameUserInOneMinute,
             createdAt: createdAt.toIso8601String());
       }
@@ -94,8 +121,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     return items;
   }
 
-  bool _isMessageFromSameUserInOneMinute(
-      Message message, Message lastMessage) {
+  bool _isMessageFromSameUserInOneMinute(Message message, Message lastMessage) {
     if (message.ownUser.userId == lastMessage.ownUser.userId) {
       return message.createdAt.formatDate("YYYYMddHHmm") ==
           lastMessage.createdAt.formatDate("YYYYMddHHmm");

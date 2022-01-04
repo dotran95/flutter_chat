@@ -33,6 +33,7 @@ dependencies:
   camera:
   path_provider:
   path:
+  flutter_keyboard_visibility: ^5.1.0
 
 dev_dependencies:
   flutter_test:

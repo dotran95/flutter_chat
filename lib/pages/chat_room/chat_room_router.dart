@@ -6,6 +6,8 @@ class ChatRoomRouter {
 
   static goToChatRoom(String conversationId) {
     return MaterialPageRoute(
-        builder: (context) => ChatRoomDetailPage(conversationId: conversationId), settings: RouteSettings(name: name));
+        builder: (context) =>
+            ChatRoomDetailPage(conversationId: conversationId),
+        settings: RouteSettings(name: name, arguments: Map()));
   }
 }

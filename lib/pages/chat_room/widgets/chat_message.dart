@@ -1,18 +1,29 @@
-import 'package:demo/modules/chat_detail/models/message.dart';
-import 'package:demo/modules/chat_detail/views/text_message.dart';
+import 'package:demo/models/index.dart';
 import 'package:flutter/material.dart';
-
 import 'image_message.dart';
+import 'text_message.dart';
 
 final double kPaddingVertical = 16.0;
 final double kPaddingHorizontal = 20.0;
 
 class MessageView {
-  final MessageItem item;
+  final Message item;
   final double kSizeAvatar = 40.0;
   final VoidCallback? onPress;
 
   const MessageView({required this.item, this.onPress});
+
+  Color get bundleBackground {
+    if (item.isOwner) {
+      return Colors.blue
+          .withOpacity(item.type == MessageType.image ? 0.0 : 0.8);
+    }
+    return Colors.grey.withOpacity(item.type == MessageType.image ? 0.0 : 0.5);
+  }
+
+  double get imagePadding {
+    return item.type == MessageType.image ? 0.0 : kPaddingHorizontal;
+  }
 
   Widget buildMessage() {
     Widget child = buildChild();
@@ -25,7 +36,7 @@ class MessageView {
     return Container();
   }
 
-  Widget buildLeftMessage(MessageItem item, Widget child) {
+  Widget buildLeftMessage(Message item, Widget child) {
     return Container(
         alignment: Alignment.bottomLeft,
         padding: EdgeInsets.only(
@@ -58,20 +69,19 @@ class MessageView {
                     _buildDateTime(
                         item.createdAtStr, !item.isMessageSameMinuteFromUser),
                     Container(
-                        padding: EdgeInsets.only(
-                            left: item.type == MessageType.image ? 0.0 : 20,
-                            top: 8,
-                            right: kPaddingHorizontal,
-                            bottom: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15.0),
-                          color: Colors.grey.withOpacity(
-                              item.type == MessageType.image ? 0.0 : 0.5),
-                        ),
-                        child: InkWell(
-                          child: child,
-                          onTap: onPress,
-                        ),
+                      padding: EdgeInsets.only(
+                          left: imagePadding,
+                          top: 8,
+                          right: kPaddingHorizontal,
+                          bottom: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: bundleBackground,
+                      ),
+                      child: InkWell(
+                        child: child,
+                        onTap: onPress,
+                      ),
                     ),
                   ],
                 ),
@@ -79,9 +89,9 @@ class MessageView {
             ]));
   }
 
-  Widget buildRightMessage(MessageItem item, Widget child) {
+  Widget buildRightMessage(Message item, Widget child) {
     final double paddingVertical =
-    item.isMessageSameMinuteFromUser ? 3.0 : kPaddingVertical;
+        item.isMessageSameMinuteFromUser ? 3.0 : kPaddingVertical;
     return Container(
         alignment: Alignment.bottomRight,
         padding: EdgeInsets.only(
@@ -99,12 +109,11 @@ class MessageView {
               padding: EdgeInsets.only(
                   left: kPaddingHorizontal,
                   top: 8.0,
-                  right: kPaddingHorizontal,
+                  right: imagePadding,
                   bottom: 8.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15.0),
-                color: Colors.blue
-                    .withOpacity(item.type == MessageType.image ? 0.0 : 0.8),
+                color: bundleBackground,
               ),
               child: InkWell(
                 child: child,
@@ -127,7 +136,7 @@ class MessageView {
 }
 
 class ChatItemView {
-  final MessageItem item;
+  final Message item;
   final VoidCallback? onPress;
 
   const ChatItemView({required this.item, this.onPress});

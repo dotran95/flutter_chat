@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:demo/models/user.dart';
 import 'package:intl/intl.dart';
 
@@ -16,11 +18,12 @@ class Message {
   final MessageType type;
   final String? text;
   final String? imageUrl;
+  final File? image;
   final ImageSize? size;
   final User ownUser;
   final bool isOwner;
   final String createdAt;
-  bool isMessageSameMinuteFromUser;// message same minute from same user
+  bool isMessageSameMinuteFromUser; // message same minute from same user
 
   String get createdAtStr {
     final date = DateTime.parse(createdAt);
@@ -37,6 +40,7 @@ class Message {
     this.isMessageSameMinuteFromUser = false,
     this.text,
     this.imageUrl,
+    this.image,
     this.size,
   });
 }

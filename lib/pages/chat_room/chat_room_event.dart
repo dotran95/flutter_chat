@@ -1,3 +1,5 @@
+import 'dart:io';
+
 abstract class ChatRoomEvent {}
 
 class ChatRoomFetchMessage extends ChatRoomEvent {
@@ -8,7 +10,8 @@ class ChatRoomFetchMessage extends ChatRoomEvent {
 }
 
 class ChatRoomSendEvent extends ChatRoomEvent {
-  final String message;
+  final String? message;
+  final File? image;
 
-  ChatRoomSendEvent(this.message);
+  ChatRoomSendEvent({this.message, this.image});
 }
