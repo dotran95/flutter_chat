@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:demo/extension/index.dart';
+import 'package:demo/models/index.dart';
 import 'package:demo/pages/chat_room/chat_room_bloc.dart';
 import 'package:demo/pages/chat_room/chat_room_state.dart';
 import 'package:demo/pages/chat_room/widgets/chat_message.dart';
+import 'package:demo/pages/image_preview/image_preview_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,7 +46,8 @@ class _ChatRoomDetailListState extends State<ChatRoomDetailList> {
           _onScrollToBottom();
         });
 
-        return ListView.builder(
+        return KeyboardDismissOnTap(
+            child: ListView.builder(
           controller: _controller,
           itemCount: state.items.length,
           itemBuilder: (context, index) {
@@ -52,19 +55,27 @@ class _ChatRoomDetailListState extends State<ChatRoomDetailList> {
             return ChatItemView(
                 item: item,
                 onPress: () {
-                  if (item.imageUrl != null) {
-                    // context.present(scene)
+                  if (item.imageUrl != null || item.image != null) {
+                    _gotoImagePreviewScreen(item);
                   }
                 }).buildMessage();
           },
-        );
+        ));
       },
     );
   }
 
+  _gotoImagePreviewScreen(Message item) {
+    if (item.imageUrl != null || item.image != null) {
+      final scene =
+          ImagePreviewPage(imageUrl: item.imageUrl, imageFile: item.image);
+      context.present(scene: scene);
+    }
+  }
+
   _onScrollToBottom() {
     _controller.animateTo(_controller.position.maxScrollExtent,
-        duration: Duration(milliseconds: 1000), curve: Curves.easeIn);
+        duration: Duration(milliseconds: 300), curve: Curves.easeIn);
   }
 
   @override
